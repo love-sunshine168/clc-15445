@@ -206,7 +206,7 @@ TEST(TrieTest, CopyOnWriteTest3) {
   ASSERT_EQ(*trie3.Get<uint32_t>("test"), 2333);
 
   ASSERT_EQ(*trie4.Get<std::string>("te"), "23");
-  ASSERT_EQ(*trie4.Get<uint32_t>(""), 233);
+  ASSERT_EQ(*trie4.Get<uint32_t>(""), 233);  // mistake!!!
   ASSERT_EQ(*trie4.Get<uint32_t>("test"), 2333);
 
   ASSERT_EQ(*trie5.Get<uint32_t>("te"), 23);

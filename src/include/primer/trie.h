@@ -129,6 +129,8 @@ class Trie {
   // Otherwise, returns the new trie.
   auto Remove(std::string_view key) const -> Trie;
 
+  auto PostOrder(std::vector<std::shared_ptr<TrieNode>>& node_vec, std::string_view key, size_t idx) const -> std::shared_ptr<TrieNode>;
+
   // Get the root of the trie, should only be used in test cases.
   auto GetRoot() const -> std::shared_ptr<const TrieNode> { return root_; }
 };

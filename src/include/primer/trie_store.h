@@ -3,7 +3,6 @@
 #include <optional>
 #include <shared_mutex>
 #include <utility>
-
 #include "primer/trie.h"
 
 namespace bustub {

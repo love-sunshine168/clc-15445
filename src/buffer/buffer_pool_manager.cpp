@@ -34,7 +34,36 @@ BufferPoolManager::BufferPoolManager(size_t pool_size, DiskManager *disk_manager
 
 BufferPoolManager::~BufferPoolManager() { delete[] pages_; }
 
-auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * { return nullptr; }
+auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
+  // 注意区分frame_id和page_id的区别
+  frame_id_t free_frame_id = -1;
+  // 1. find in the free_list.
+  if (!free_list_.empty()) {
+    *page_id = AllocatePage();
+    free_frame_id = free_list_.front();
+    free_list_.pop_front();
+  }
+  // 2.
+  else {
+    if (!(replacer_->Evict(&free_frame_id))) {return nullptr;}
+    *page_id = AllocatePage();
+    Page* get_page_ptr = pages_+free_frame_id;
+    // 如果是脏页，写回
+    if (get_page_ptr->IsDirty()) {
+      DiskRequest req {true, get_page_ptr->GetData(), get_page_ptr->GetPageId(), std::promise<bool>()};
+      std::future<bool> is_finish = req.callback_.get_future();
+      disk_scheduler_->Schedule(std::move(req));
+      is_finish.get();
+    }
+    // 重置页
+    get_page_ptr->ResetMemory();
+  }
+  replacer_->SetEvictable(free_frame_id, false);
+  replacer_->RecordAccess(free_frame_id);
+
+  return pages_+free_frame_id;
+
+}
 
 auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType access_type) -> Page * {
   return nullptr;
